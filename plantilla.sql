@@ -1,4 +1,4 @@
-\pset pager off                 -- Configuración
+\pset pager off
 SET client_encoding = 'UTF8';
 
 BEGIN;
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS pilotos_temp(
     codigo text,
     nombre text,
     apellido text,
-    fechaNacimiento text,
+    fecha_nacimiento text,
     nacionalidad text,
     url text
 );
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS estado_temp (
 
 \COPY temp.circuitos_temp from 'data\circuits.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL 'NULL', ENCODING 'UTF-8');
 \COPY temp.escuderia_temp from 'data\constructors.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL 'NULL', ENCODING 'UTF-8');
-\COPY temp.pilotos_temp from 'data\drivers.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL 'NULL', ENCODING 'UTF-8');
+\COPY temp.pilotos_temp from 'data\drivers.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL '\N', ENCODING 'UTF-8');
 \COPY temp.lap_times_temp from 'data\lap_times.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL 'NULL', ENCODING 'UTF-8');
 \COPY temp.pit_stops_temp from 'data\pit_stops.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL 'NULL', ENCODING 'UTF-8');
 \COPY temp.clasificarse_temp from 'data\qualifying.csv' WITH (FORMAT csv, HEADER, DELIMITER ',', NULL 'NULL', ENCODING 'UTF-8');
@@ -135,18 +135,18 @@ CREATE SCHEMA IF NOT EXISTS formula1;
 SET search_path = formula1;
 
 CREATE TABLE IF NOT EXISTS formula1.piloto(
-    piloto_ref CHAR(40) NOT NULL,
+    pilotoRef CHAR(40) NOT NULL,
+    num_piloto int,
+    codigo CHAR(3),
     nombre_piloto CHAR(40),
     apellido CHAR(40),
-    nacionalidad CHAR(40),
-    codigo CHAR(3),
     fecha_nacimiento DATE,
-    num_piloto int,
+    nacionalidad CHAR(40),
     url CHAR(100),
-    CONSTRAINT piloto_pk PRIMARY KEY (piloto_ref)
+    CONSTRAINT piloto_pk PRIMARY KEY (pilotoRef)
 );
 CREATE TABLE IF NOT EXISTS formula1.circuito(
-    circuito_ref CHAR(40) NOT NULL,
+    circuitoRef CHAR(40) NOT NULL,
     nombre_circuito CHAR(40),
     ciudad CHAR(40),
     pais CHAR(40),
@@ -154,14 +154,14 @@ CREATE TABLE IF NOT EXISTS formula1.circuito(
     latitud FLOAT,
     longitud FLOAT,
     altura FLOAT,
-    CONSTRAINT circuito_pk PRIMARY KEY (circuito_ref)
+    CONSTRAINT circuito_pk PRIMARY KEY (circuitoRef)
 );
 CREATE TABLE IF NOT EXISTS formula1.escuderia(
-    escuderia_ref CHAR(40) NOT NULL,
+    escuderiaRef CHAR(40) NOT NULL,
     nombre_escuderia CHAR(40),
     nacionalidad CHAR(40),
     url CHAR(100),
-    CONSTRAINT escuderia_pk PRIMARY KEY (escuderia_ref)
+    CONSTRAINT escuderia_pk PRIMARY KEY (escuderiaRef)
 );
 CREATE TABLE IF NOT EXISTS formula1.temporada(
     anno int NOT NULL,
@@ -171,92 +171,85 @@ CREATE TABLE IF NOT EXISTS formula1.temporada(
 CREATE TABLE IF NOT EXISTS formula1.gran_premio(
     nombre_gp CHAR(40) NOT NULL,
     anno_temporada int,
-    circuito_ref CHAR(40),
+    circuitoRef CHAR(40),
     ronda int ,
     fecha_hora TIMESTAMP,
     url CHAR(40),
-    CONSTRAINT gran_premio_pk PRIMARY KEY (nombre_gp, anno_temporada, circuito_ref),
+    CONSTRAINT gran_premio_pk PRIMARY KEY (nombre_gp, anno_temporada, circuitoRef),
     CONSTRAINT gran_premio_fk1 FOREIGN KEY (anno_temporada) REFERENCES formula1.temporada(anno)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT gran_premio_fk2 FOREIGN KEY (circuito_ref) REFERENCES circuito(circuito_ref)
+    CONSTRAINT gran_premio_fk2 FOREIGN KEY (circuitoRef) REFERENCES circuito(circuitoRef)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS formula1.corre(
-    escuderia_ref CHAR(40),
-    piloto_ref CHAR(40),
+    escuderiaRef CHAR(40),
+    pilotoRef CHAR(40),
     nombre_gp CHAR(40),
     anno_temporada int,
-    circuito_ref CHAR(40),
+    circuitoRef CHAR(40),
     posicion int,
     estado CHAR(40),
     puntos int,
-    CONSTRAINT corre_pk PRIMARY KEY (escuderia_ref, piloto_ref, nombre_gp, anno_temporada, circuito_ref),
-    CONSTRAINT corre_fk1 FOREIGN KEY (escuderia_ref) REFERENCES formula1.escuderia(escuderiaRef)
+    CONSTRAINT corre_pk PRIMARY KEY (escuderiaRef, pilotoRef, nombre_gp, anno_temporada, circuitoRef),
+    CONSTRAINT corre_fk1 FOREIGN KEY (escuderiaRef) REFERENCES formula1.escuderia(escuderiaRef)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT corre_fk2 FOREIGN KEY (piloto_ref) REFERENCES formula1.piloto(piloto_ref)
+    CONSTRAINT corre_fk2 FOREIGN KEY (pilotoRef) REFERENCES formula1.piloto(pilotoRef)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT corre_fk3 FOREIGN KEY (nombre_gp, anno_temporada, circuito_ref) REFERENCES formula1.gran_premio(nombre_gp, anno_temporada, circuito_ref) 
+    CONSTRAINT corre_fk3 FOREIGN KEY (nombre_gp, anno_temporada, circuitoRef) REFERENCES formula1.gran_premio(nombre_gp, anno_temporada, circuitoRef) 
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS formula1.califica(
-    piloto_ref CHAR(40),
+    pilotoRef CHAR(40),
     anno_temporada int,
-    circuito_ref CHAR(40),
+    circuitoRef CHAR(40),
     nombre_gp CHAR(40) NOT NULL,
     posicion int,
     estado CHAR(40),
     puntos int,
-    CONSTRAINT califica_pk PRIMARY KEY(piloto_ref, anno_temporada, circuito_ref, nombre_gp),
-    CONSTRAINT califica_fk1 FOREIGN KEY (piloto_ref) REFERENCES formula1.piloto(piloto_ref)
+    CONSTRAINT califica_pk PRIMARY KEY(pilotoRef, anno_temporada, circuitoRef, nombre_gp),
+    CONSTRAINT califica_fk1 FOREIGN KEY (pilotoRef) REFERENCES formula1.piloto(pilotoRef)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT califica_fk2 FOREIGN KEY (anno_temporada, circuito_ref, nombre_gp) REFERENCES formula1.gran_premio(anno_temporada, circuito_ref, nombre_gp)
+    CONSTRAINT califica_fk2 FOREIGN KEY (anno_temporada, circuitoRef, nombre_gp) REFERENCES formula1.gran_premio(anno_temporada, circuitoRef, nombre_gp)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS formula1.vuelta(
-    piloto_ref CHAR(40),
+    pilotoRef CHAR(40),
     anno_temporada int,
-    circuito_ref CHAR(40),
+    circuitoRef CHAR(40),
     nombre_gp CHAR(40),
     num_vuelta int NOT NULL,
     posicion int,
     tiempo FLOAT,
-    CONSTRAINT vuelta_pk PRIMARY KEY(piloto_ref, annoTemporada, circuitoRef, nombreGP, num_vuelta),
-    CONSTRAINT vuelta_fk1 FOREIGN KEY (piloto_ref) REFERENCES formula1.piloto(piloto_ref)
+    CONSTRAINT vuelta_pk PRIMARY KEY(pilotoRef, anno_temporada, circuitoRef, nombre_gp, num_vuelta),
+    CONSTRAINT vuelta_fk1 FOREIGN KEY (pilotoRef) REFERENCES formula1.piloto(pilotoRef)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT vuelta_fk2 FOREIGN KEY (anno_temporada, circuito_ref, nombre_gp) REFERENCES formula1.gran_premio(anno_temporada, circuito_ref, nombre_gp)
+    CONSTRAINT vuelta_fk2 FOREIGN KEY (anno_temporada, circuitoRef, nombre_gp) REFERENCES formula1.gran_premio(anno_temporada, circuitoRef, nombre_gp)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS formula1.boxes(
-    piloto_ref CHAR(40),
+    pilotoRef CHAR(40),
     anno_temporada int,
-    circuito_ref CHAR(40),
+    circuitoRef CHAR(40),
     nombre_gp CHAR(40),
     num_vuelta int,
     tiempoBoxes TIME,
-    CONSTRAINT boxes_pk PRIMARY KEY(piloto_ref, annoTemporada, circuitoRef, nombreGP, num_vuelta),
-    CONSTRAINT boxes_fk FOREIGN KEY (piloto_ref, annoTemporada, circuitoRef, nombreGP, num_vuelta) REFERENCES formula1.vuelta(piloto_ref, annoTemporada, circuitoRef, nombreGP, num_vuelta)
+    CONSTRAINT boxes_pk PRIMARY KEY(pilotoRef, anno_temporada, circuitoRef, nombre_gp, num_vuelta),
+    CONSTRAINT boxes_fk FOREIGN KEY (pilotoRef, anno_temporada, circuitoRef, nombre_gp, num_vuelta) REFERENCES formula1.vuelta(pilotoRef, anno_temporada, circuitoRef, nombre_gp, num_vuelta)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-INSERT INTO formula1.piloto(piloto_ref, nombre_piloto, apellido, nacionalidad, codigo, fecha_nacimiento, num_piloto, url) 
-SELECT DISTINCT ON (TRIM(pt.pilotoRef)) TRIM(pt.pilotoRef)::CHAR(40) AS piloto_ref, NULLIF(TRIM(pt.nombre),'')::CHAR(40) AS nombre_piloto, NULLIF(TRIM(pt.apellido),'')::CHAR(40) AS apellido, NULLIF(TRIM(pt.nacionalidad),'')::CHAR(40) AS nacionalidad, NULLIF(TRIM(pt.codigo),'')::CHAR(3) AS codigo, NULLIF(TRIM(pt.fechaNacimiento),'')::DATE AS fecha_nacimiento, NULLIF(NULLIF(TRIM(pt.numero),''),'NULL')::INT AS num_piloto, NULLIF(TRIM(pt.url),'')::CHAR(100) AS url FROM temp.pilotos_temp pt WHERE COALESCE(NULLIF(TRIM(pt.pilotoRef),''), NULL) IS NOT NULL ORDER BY TRIM(pt.pilotoRef) ON CONFLICT (piloto_ref) DO NOTHING;
+INSERT INTO formula1.piloto(pilotoRef,nombre_piloto,apellido,nacionalidad,codigo,fecha_nacimiento,num_piloto,url)
+    SELECT DISTINCT ON (pilotoRef)
+    pilotoRef::CHAR(40),
+    nombre::CHAR(40),
+    apellido::CHAR(40),
+    nacionalidad::CHAR(40),
+    codigo::CHAR(3),
+    fecha_nacimiento::DATE,
+    numero::int,
+    url::CHAR(100)
+FROM temp.pilotos_temp
 
-INSERT INTO formula1.circuito(circuito_ref, nombre_circuito, ciudad, pais, url, latitud, longitud, altura) SELECT DISTINCT ON (TRIM(ct.circuitoRef)) TRIM(ct.circuitoRef)::CHAR(40) AS circuito_ref, NULLIF(TRIM(ct.nombre),'')::CHAR(40) AS nombre_circuito, NULLIF(TRIM(ct.ciudad),'')::CHAR(40) AS ciudad, NULLIF(TRIM(ct.pais),'')::CHAR(40) AS pais, NULLIF(TRIM(ct.url),'')::CHAR(100) AS url, CASE WHEN NULLIF(TRIM(ct.latitud),'') IS NULL THEN NULL ELSE REPLACE(TRIM(ct.latitud),',','.')::FLOAT END AS latitud, CASE WHEN NULLIF(TRIM(ct.longitud),'') IS NULL THEN NULL ELSE REPLACE(TRIM(ct.longitud),',','.')::FLOAT END AS longitud, CASE WHEN NULLIF(TRIM(ct.altura),'') IS NULL THEN NULL ELSE REPLACE(TRIM(ct.altura),',','.')::FLOAT END AS altura FROM temp.circuitos_temp ct WHERE COALESCE(NULLIF(TRIM(ct.circuitoRef),''), NULL) IS NOT NULL ORDER BY TRIM(ct.circuitoRef) ON CONFLICT (circuito_ref) DO NOTHING;
+ROLLBACK;
 
-INTO formula1.escuderia(escuderia_ref, nombre_escuderia, nacionalidad, url) SELECT DISTINCT ON (TRIM(ec.escuderiaRef)) TRIM(ec.escuderiaRef)::CHAR(40) AS escuderia_ref, NULLIF(TRIM(ec.nombre),'')::CHAR(40) AS nombre_escuderia, NULLIF(TRIM(ec.nacionalidad),'')::CHAR(40) AS nacionalidad, NULLIF(TRIM(ec.url),'')::CHAR(100) AS url FROM temp.escuderia_temp ec WHERE COALESCE(NULLIF(TRIM(ec.escuderiaRef),''), NULL) IS NOT NULL ORDER BY TRIM(ec.escuderiaRef) ON CONFLICT (escuderia_ref) DO NOTHING;
 
-INSERT INTO formula1.temporada(anno, url) SELECT DISTINCT NULLIF(TRIM(tt.year),'')::INT AS anno, NULLIF(TRIM(tt.url),'')::CHAR(40) AS url FROM temp.temporadas_temp tt WHERE COALESCE(NULLIF(TRIM(tt.year),''), NULL) IS NOT NULL ON CONFLICT (anno) DO NOTHING;
-
-INSERT INTO formula1.gran_premio(nombre_gp, anno_temporada, circuito_ref, ronda, fecha_hora, url) SELECT DISTINCT ON (TRIM(rp.granPremioId)) NULLIF(TRIM(rp.name),'')::CHAR(40) AS nombre_gp, NULLIF(TRIM(rp.year),'')::INT AS anno_temporada, TRIM(circ.circuitoRef)::CHAR(40) AS circuito_ref, NULLIF(NULLIF(TRIM(rp.round),''),'NULL')::INT AS ronda, -- Combina date + time si existe, si no usa solo date (CASE WHEN COALESCE(NULLIF(TRIM(rp.time),''), '') <> '' THEN (NULLIF(TRIM(rp.date), '') || ' ' || NULLIF(TRIM(rp.time), ''))::TIMESTAMP ELSE NULLIF(TRIM(rp.date),'')::DATE::TIMESTAMP END) AS fecha_hora, NULLIF(TRIM(rp.url),'')::CHAR(40) AS url FROM temp.carreras_temp rp LEFT JOIN temp.circuitos_temp circ ON TRIM(circ.circuitoID) = TRIM(rp.circuitId) WHERE COALESCE(NULLIF(TRIM(rp.granPremioId),''), NULL) IS NOT NULL ORDER BY TRIM(rp.granPremioId) ON CONFLICT (nombre_gp, anno_temporada, circuito_ref) DO NOTHING;
-
-INSERT INTO formula1.corre(escuderia_ref, piloto_ref, nombre_gp, anno_temporada, circuito_ref, posicion, estado, puntos) SELECT TRIM(ec.escuderiaRef)::CHAR(40) AS escuderia_ref, TRIM(pt.pilotoRef)::CHAR(40) AS piloto_ref, NULLIF(TRIM(r.name),'')::CHAR(40) AS nombre_gp, NULLIF(TRIM(r.year),'')::INT AS anno_temporada, TRIM(circ.circuitoRef)::CHAR(40) AS circuito_ref, CASE WHEN COALESCE(NULLIF(TRIM(res.posicion),''), '') = '' THEN NULL ELSE NULLIF(TRIM(res.posicion),'')::INT END AS posicion, NULLIF(TRIM(st.status),'')::CHAR(40) AS estado, CASE WHEN COALESCE(NULLIF(TRIM(res.puntos),''), '') = '' THEN NULL ELSE NULLIF(TRIM(res.puntos),'')::INT END AS puntos FROM temp.resultados_temp res LEFT JOIN temp.carreras_temp r ON TRIM(r.granPremioId) = TRIM(res.gpid) LEFT JOIN temp.circuitos_temp circ ON TRIM(circ.circuitoID) = TRIM(r.circuitId) LEFT JOIN temp.pilotos_temp pt ON TRIM(pt.pilotoID) = TRIM(res.pilotoid) LEFT JOIN temp.escuderia_temp ec ON TRIM(ec.escuderiaID) = TRIM(res.escuderiaid) LEFT JOIN temp.estado_temp st ON TRIM(st.statusId) = TRIM(res.estadoid) WHERE COALESCE(NULLIF(TRIM(res.gpid),''), NULL) IS NOT NULL AND TRIM(pt.pilotoRef) IS NOT NULL ON CONFLICT (escuderia_ref, piloto_ref, nombre_gp, anno_temporada, circuito_ref) DO NOTHING;
-
-INSERT califica (qualifying) -> usamos position; estado y puntos no vienen en qualifying, se dejan NULL/0 INSERT INTO formula1.califica(piloto_ref, anno_temporada, circuito_ref, nombre_gp, posicion, estado, puntos) SELECT TRIM(pt.pilotoRef)::CHAR(40) AS piloto_ref, NULLIF(TRIM(r.year),'')::INT AS anno_temporada, TRIM(circ.circuitoRef)::CHAR(40) AS circuito_ref, NULLIF(TRIM(r.name),'')::CHAR(40) AS nombre_gp, CASE WHEN COALESCE(NULLIF(TRIM(q.position),''),'') = '' THEN NULL ELSE NULLIF(TRIM(q.position),'')::INT END AS posicion, NULL::CHAR(40) AS estado, 0 AS puntos FROM temp.clasificarse_temp q LEFT JOIN temp.carreras_temp r ON TRIM(r.granPremioId) = TRIM(q.raceId) LEFT JOIN temp.circuitos_temp circ ON TRIM(circ.circuitoID) = TRIM(r.circuitId) LEFT JOIN temp.pilotos_temp pt ON TRIM(pt.pilotoID) = TRIM(q.driverId) WHERE COALESCE(NULLIF(TRIM(q.qualifyId),''), NULL) IS NOT NULL AND TRIM(pt.pilotoRef) IS NOT NULL ON CONFLICT (piloto_ref, anno_temporada, circuito_ref, nombre_gp) DO NOTHING;
-
-INSERT vuelta (lap times). Usamos miliseg para calcular tiempo en segundos si está disponible INSERT INTO formula1.vuelta(piloto_ref, anno_temporada, circuito_ref, nombre_gp, num_vuelta, posicion, tiempo) SELECT TRIM(pt.pilotoRef)::CHAR(40) AS piloto_ref, NULLIF(TRIM(r.year),'')::INT AS anno_temporada, TRIM(circ.circuitoRef)::CHAR(40) AS circuito_ref, NULLIF(TRIM(r.name),'')::CHAR(40) AS nombre_gp, NULLIF(TRIM(lt.vuelta),'')::INT AS num_vuelta, CASE WHEN COALESCE(NULLIF(TRIM(lt.posicion),''),'') = '' THEN NULL ELSE NULLIF(TRIM(lt.posicion),'')::INT END AS posicion, CASE WHEN COALESCE(NULLIF(TRIM(lt.miliseg),''),'') = '' THEN NULL ELSE NULLIF(TRIM(lt.miliseg),'')::INT / 1000.0 END AS tiempo FROM temp.lap_times_temp lt LEFT JOIN temp.carreras_temp r ON TRIM(r.granPremioId) = TRIM(lt.carreraID) LEFT JOIN temp.circuitos_temp circ ON TRIM(circ.circuitoID) = TRIM(r.circuitId) LEFT JOIN temp.pilotos_temp pt ON TRIM(pt.pilotoID) = TRIM(lt.pilotoID) WHERE COALESCE(NULLIF(TRIM(lt.carreraID),''), NULL) IS NOT NULL AND TRIM(pt.pilotoRef) IS NOT NULL ON CONFLICT (piloto_ref, anno_temporada, circuito_ref, nombre_gp, num_vuelta) DO NOTHING;
-
-INSERT boxes (pit stops) -> tiempoBoxes as TIME (si el formato lo permite) INSERT INTO formula1.boxes(piloto_ref, anno_temporada, circuito_ref, nombre_gp, num_vuelta, tiempoBoxes) SELECT TRIM(pt.pilotoRef)::CHAR(40) AS piloto_ref, NULLIF(TRIM(r.year),'')::INT AS anno_temporada, TRIM(circ.circuitoRef)::CHAR(40) AS circuito_ref, NULLIF(TRIM(r.name),'')::CHAR(40) AS nombre_gp, NULLIF(NULLIF(TRIM(ps.lap),''),'NULL')::INT AS num_vuelta, -- time in pit_stops may be a wall-clock time (HH:MI:SS) or relative; try cast to TIME, if fails insert NULL (CASE WHEN COALESCE(NULLIF(TRIM(ps.time),''),'') = '' THEN NULL ELSE NULLIF(TRIM(ps.time),'')::TIME END) AS tiempoBoxes FROM temp.pit_stops_temp ps LEFT JOIN temp.carreras_temp r ON TRIM(r.granPremioId) = TRIM(ps.raceId) LEFT JOIN temp.circuitos_temp circ ON TRIM(circ.circuitoID) = TRIM(r.circuitId) LEFT JOIN temp.pilotos_temp pt ON TRIM(pt.pilotoID) = TRIM(ps.driverId) WHERE COALESCE(NULLIF(TRIM(ps.raceId),''), NULL) IS NOT NULL AND TRIM(pt.pilotoRef) IS NOT NULL ON CONFLICT (piloto_ref, anno_temporada, circuito_ref, nombre_gp, num_vuelta) DO NOTHING;
-
-\echo 'Inserciones completadas (no se hace commit por defecto en este script)'
-
-ROLLBACK;                       --importante! permite correr el script multiples veces...
