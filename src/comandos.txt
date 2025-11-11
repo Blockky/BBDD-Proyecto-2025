@@ -1,0 +1,21 @@
+BEGIN
+
+CREATE SCHEMA IF NOT EXISTS <schema>;
+
+SET search_path = <schema>;
+
+CREATE TABLE IF NOT EXISTS <table>(
+    <atribute> <type>,
+    ...
+    CONSTRAINT <tablePK> PRIMARY KEY (<atributes>),
+    CONSTRAINT <tableFK> FOREIGN KEY (<atributes>) REFERENCES <table>(<atributes>)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+\COPY <table> from <file.csv> WITH (FORMAT csv, ...)
+
+INSERT INTO <schema>.<table>(<atributes>)
+    SELECT DISTINCT ON (<atributes>)
+    <atribute>::<type>,
+    ...
+FROM <schema>.<table>;
