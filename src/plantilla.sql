@@ -363,4 +363,4 @@ JOIN temp.granPremio gp ON gp.carreraId = b.carreraId
 JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;;
 
 
-ROLLBACK;
+COMMIT;
