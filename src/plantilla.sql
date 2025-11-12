@@ -319,15 +319,18 @@ JOIN temp.estado s ON s.estadoId = r.estadoId;
 \echo 'Cargando pilotos califica gps'
 INSERT INTO final.califica(pilotoRef,anno,circuitoRef,nombreGP,posicion,q1,q2,q3)
     SELECT DISTINCT ON (pilotoRef,anno,circuitoRef,nombreGP)
-    (SELECT pilotoRef FROM temp.piloto WHERE pilotoId = c.pilotoId)::CHAR(40),
-    (SELECT anno FROM temp.granPremio WHERE carreraId = c.carreraId)::int,
-    (SELECT circuitoRef FROM temp.circuito WHERE circuitoId = (SELECT circuitoId FROM temp.granPremio WHERE carreraId = c.carreraId))::CHAR(40),
-    (SELECT nombreGP FROM temp.granPremio WHERE carreraId = c.carreraId)::CHAR(40),
-    posicion::int,
-    NULLIF(q1,'')::TIME,
-    NULLIF(q2,'')::TIME,
-    NULLIF(q3,'')::TIME
-FROM temp.califica c;
+    p.pilotoRef::CHAR(40),
+    gp.anno::int,
+    c.circuitoRef::CHAR(40),
+    gp.nombreGP::CHAR(40),
+    q.posicion::int,
+    NULLIF(q.q1,'')::TIME,
+    NULLIF(q.q2,'')::TIME,
+    NULLIF(q.q3,'')::TIME
+FROM temp.califica q
+JOIN temp.piloto p ON p.pilotoId = q.pilotoId
+JOIN temp.granPremio gp ON gp.carreraId = q.carreraId
+JOIN temp.circuito c ON c.circuitoId = gp.circuitoId; 
 
 \echo 'Cargando pilotos corren vueltas de gps'
 INSERT INTO final.vuelta(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,posicion,tiempo)
@@ -347,14 +350,17 @@ JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;
 \echo 'Cargando pilotos realizan pit stops en gps'
 INSERT INTO final.boxes(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,hora,tiempo)
     SELECT DISTINCT ON (pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,hora)
-    (SELECT pilotoRef FROM temp.piloto WHERE pilotoId = b.pilotoId)::CHAR(40),
-    (SELECT anno FROM temp.granPremio WHERE carreraId = b.carreraId)::int,
-    (SELECT circuitoRef FROM temp.circuito WHERE circuitoId = (SELECT circuitoId FROM temp.granPremio WHERE carreraId = b.carreraId))::CHAR(40),
-    (SELECT nombreGP FROM temp.granPremio WHERE carreraId = b.carreraId)::CHAR(40),
-    numeroVuelta::int,
-    hora::TIME,
-    milisegundos::int
-FROM temp.boxes b;
+    p.pilotoRef::CHAR(40),
+    gp.anno::int,
+    c.circuitoRef::CHAR(40),
+    gp.nombreGP::CHAR(40),
+    b.numeroVuelta::int,
+    b.hora::TIME,
+    b.milisegundos::int
+FROM temp.boxes b
+JOIN temp.piloto p ON p.pilotoId = b.pilotoId
+JOIN temp.granPremio gp ON gp.carreraId = b.carreraId
+JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;;
 
 
 ROLLBACK;
