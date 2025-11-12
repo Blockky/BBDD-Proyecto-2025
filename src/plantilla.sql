@@ -310,11 +310,11 @@ INSERT INTO final.corre(escuderiaRef,pilotoRef,nombreGP,anno,circuitoRef,posicio
     s.estado::CHAR(40),
     r.puntos::FLOAT
 FROM temp.resultado r
-LEFT JOIN temp.piloto p ON p.pilotoId = r.pilotoId
-LEFT JOIN temp.escuderia e ON e.escuderiaId = r.escuderiaId
-LEFT JOIN temp.granPremio gp ON gp.carreraId = r.carreraId
-LEFT JOIN temp.circuito c ON c.circuitoId = gp.circuitoId
-LEFT JOIN temp.estado s ON s.estadoId = r.estadoId;
+JOIN temp.piloto p ON p.pilotoId = r.pilotoId
+JOIN temp.escuderia e ON e.escuderiaId = r.escuderiaId
+JOIN temp.granPremio gp ON gp.carreraId = r.carreraId
+JOIN temp.circuito c ON c.circuitoId = gp.circuitoId
+JOIN temp.estado s ON s.estadoId = r.estadoId;
 
 \echo 'Cargando pilotos califica gps'
 INSERT INTO final.califica(pilotoRef,anno,circuitoRef,nombreGP,posicion,q1,q2,q3)
