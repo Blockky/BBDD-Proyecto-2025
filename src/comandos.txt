@@ -17,5 +17,7 @@ CREATE TABLE IF NOT EXISTS <table>(
 INSERT INTO <schema>.<table>(<atributes>)
     SELECT DISTINCT ON (<atributes>)
     <atribute>::<type>,
+    (SELECT <a> FROM <s>.<t> WHERE <a> = <t>.<a>)::<type>,
     ...
-FROM <schema>.<table>;
+FROM <schema>.<table> <alias1>
+LEFT JOIN <schema>.<table> <alias2> ON <alias2>.<a> = <alias1>.<a>;

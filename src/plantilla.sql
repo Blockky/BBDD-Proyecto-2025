@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS boxes(
     nombreGP CHAR(40),
     numeroVuelta int,
     hora TIME,
-    tiempo FLOAT,
+    tiempo int,
     CONSTRAINT boxesPK PRIMARY KEY(pilotoRef, anno, circuitoRef, nombreGP, numeroVuelta, hora),
     CONSTRAINT boxesFK FOREIGN KEY (pilotoRef, anno, circuitoRef, nombreGP, numeroVuelta) REFERENCES vuelta(pilotoRef, anno, circuitoRef, nombreGP, numeroVuelta)
     ON DELETE RESTRICT ON UPDATE CASCADE
@@ -289,26 +289,32 @@ FROM temp.temporada;
 \echo 'Cargando gps'
 INSERT INTO final.granPremio(nombreGP,anno,circuitoRef,ronda,fechaHora,url)
     SELECT DISTINCT ON (nombreGP, anno, circuitoRef)
-    nombreGP::CHAR(40),
-    anno::int,
-    (SELECT circuitoRef FROM temp.circuito WHERE circuitoId = g.circuitoId)::CHAR(40),
-    ronda::int,
-    (fecha || ' ' || hora)::TIMESTAMP,
-    url::CHAR(40)
-FROM temp.granPremio g;
+    gp.nombreGP::CHAR(40),
+    gp.anno::int,
+    c.circuitoRef::CHAR(40),
+    gp.ronda::int,
+    (gp.fecha || ' ' || gp.hora)::TIMESTAMP,
+    gp.url::CHAR(40)
+FROM temp.granPremio gp
+JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;
 
 \echo 'Cargando pilotos corren gps'
 INSERT INTO final.corre(escuderiaRef,pilotoRef,nombreGP,anno,circuitoRef,posicion,estado,puntos)
     SELECT DISTINCT ON (escuderiaRef,pilotoRef,nombreGP,anno,circuitoRef)
-    (SELECT escuderiaRef FROM temp.escuderia WHERE escuderiaId = r.escuderiaId)::CHAR(40),
-    (SELECT pilotoRef FROM temp.piloto WHERE pilotoId = r.pilotoId)::CHAR(40),
-    (SELECT nombreGP FROM temp.granPremio WHERE carreraId = r.carreraId)::CHAR(40),
-    (SELECT anno FROM temp.granPremio WHERE carreraId = r.carreraId)::int,
-    (SELECT circuitoRef FROM temp.circuito WHERE circuitoId = (SELECT circuitoId FROM temp.granPremio WHERE carreraId = r.carreraId))::CHAR(40),
-    posicion::int,
-    (SELECT estado FROM temp.estado WHERE estadoId = r.estadoId)::CHAR(40),
-    puntos::FLOAT
-FROM temp.resultado r;
+    e.escuderiaRef::CHAR(40),
+    p.pilotoRef::CHAR(40),
+    gp.nombreGP::CHAR(40),
+    gp.anno::int,
+    c.circuitoRef::CHAR(40),
+    r.posicion::int,
+    s.estado::CHAR(40),
+    r.puntos::FLOAT
+FROM temp.resultado r
+LEFT JOIN temp.piloto p ON p.pilotoId = r.pilotoId
+LEFT JOIN temp.escuderia e ON e.escuderiaId = r.escuderiaId
+LEFT JOIN temp.granPremio gp ON gp.carreraId = r.carreraId
+LEFT JOIN temp.circuito c ON c.circuitoId = gp.circuitoId
+LEFT JOIN temp.estado s ON s.estadoId = r.estadoId;
 
 \echo 'Cargando pilotos califica gps'
 INSERT INTO final.califica(pilotoRef,anno,circuitoRef,nombreGP,posicion,q1,q2,q3)
@@ -326,14 +332,17 @@ FROM temp.califica c;
 \echo 'Cargando pilotos corren vueltas de gps'
 INSERT INTO final.vuelta(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,posicion,tiempo)
     SELECT DISTINCT ON (pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,tiempo)
-    (SELECT pilotoRef FROM temp.piloto WHERE pilotoId = v.pilotoId)::CHAR(40),
-    (SELECT anno FROM temp.granPremio WHERE carreraId = v.carreraId)::int,
-    (SELECT circuitoRef FROM temp.circuito WHERE circuitoId = (SELECT circuitoId FROM temp.granPremio WHERE carreraId = v.carreraId))::CHAR(40),
-    (SELECT nombreGP FROM temp.granPremio WHERE carreraId = v.carreraId)::CHAR(40),
-    numeroVuelta::int,
-    posicion::int,
-    tiempo::TIME
-FROM temp.vuelta v;
+    p.pilotoRef::CHAR(40),
+    gp.anno::int,
+    c.circuitoRef::CHAR(40),
+    gp.nombreGP::CHAR(40),
+    v.numeroVuelta::int,
+    v.posicion::int,
+    v.tiempo::TIME
+FROM temp.vuelta v
+JOIN temp.piloto p ON p.pilotoId = v.pilotoId
+JOIN temp.granPremio gp ON gp.carreraId = v.carreraId
+JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;
 
 \echo 'Cargando pilotos realizan pit stops en gps'
 INSERT INTO final.boxes(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,hora,tiempo)
@@ -344,7 +353,7 @@ INSERT INTO final.boxes(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,hora,ti
     (SELECT nombreGP FROM temp.granPremio WHERE carreraId = b.carreraId)::CHAR(40),
     numeroVuelta::int,
     hora::TIME,
-    milisegundos::TIME
+    milisegundos::int
 FROM temp.boxes b;
 
 
