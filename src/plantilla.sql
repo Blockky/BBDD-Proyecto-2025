@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS granPremio(
     nombreGP CHAR(40) NOT NULL,
     anno int,
     circuitoRef CHAR(40),
-    ronda int ,
+    ronda int,
     fechaHora TIMESTAMP,
     url CHAR(40),
     CONSTRAINT granPremioPK PRIMARY KEY (nombreGP, anno, circuitoRef),
@@ -295,8 +295,8 @@ INSERT INTO final.granPremio(nombreGP,anno,circuitoRef,ronda,fechaHora,url)
     gp.ronda::int,
     (gp.fecha || ' ' || gp.hora)::TIMESTAMP,
     gp.url::CHAR(40)
-FROM temp.granPremio gp
-JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;
+FROM temp.granPremio AS gp
+JOIN temp.circuito AS c ON c.circuitoId = gp.circuitoId;
 
 \echo 'Cargando pilotos corren gps'
 INSERT INTO final.corre(escuderiaRef,pilotoRef,nombreGP,anno,circuitoRef,posicion,estado,puntos)
@@ -309,12 +309,12 @@ INSERT INTO final.corre(escuderiaRef,pilotoRef,nombreGP,anno,circuitoRef,posicio
     r.posicion::int,
     s.estado::CHAR(40),
     r.puntos::FLOAT
-FROM temp.resultado r
-JOIN temp.piloto p ON p.pilotoId = r.pilotoId
-JOIN temp.escuderia e ON e.escuderiaId = r.escuderiaId
-JOIN temp.granPremio gp ON gp.carreraId = r.carreraId
-JOIN temp.circuito c ON c.circuitoId = gp.circuitoId
-JOIN temp.estado s ON s.estadoId = r.estadoId;
+FROM temp.resultado AS r
+JOIN temp.piloto AS p ON p.pilotoId = r.pilotoId
+JOIN temp.escuderia AS e ON e.escuderiaId = r.escuderiaId
+JOIN temp.granPremio AS gp ON gp.carreraId = r.carreraId
+JOIN temp.circuito AS c ON c.circuitoId = gp.circuitoId
+JOIN temp.estado AS s ON s.estadoId = r.estadoId;
 
 \echo 'Cargando pilotos califica gps'
 INSERT INTO final.califica(pilotoRef,anno,circuitoRef,nombreGP,posicion,q1,q2,q3)
@@ -327,10 +327,10 @@ INSERT INTO final.califica(pilotoRef,anno,circuitoRef,nombreGP,posicion,q1,q2,q3
     NULLIF(q.q1,'')::TIME,
     NULLIF(q.q2,'')::TIME,
     NULLIF(q.q3,'')::TIME
-FROM temp.califica q
-JOIN temp.piloto p ON p.pilotoId = q.pilotoId
-JOIN temp.granPremio gp ON gp.carreraId = q.carreraId
-JOIN temp.circuito c ON c.circuitoId = gp.circuitoId; 
+FROM temp.califica AS q
+JOIN temp.piloto AS p ON p.pilotoId = q.pilotoId
+JOIN temp.granPremio AS gp ON gp.carreraId = q.carreraId
+JOIN temp.circuito AS c ON c.circuitoId = gp.circuitoId; 
 
 \echo 'Cargando pilotos corren vueltas de gps'
 INSERT INTO final.vuelta(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,posicion,tiempo)
@@ -342,10 +342,10 @@ INSERT INTO final.vuelta(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,posici
     v.numeroVuelta::int,
     v.posicion::int,
     v.tiempo::TIME
-FROM temp.vuelta v
-JOIN temp.piloto p ON p.pilotoId = v.pilotoId
-JOIN temp.granPremio gp ON gp.carreraId = v.carreraId
-JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;
+FROM temp.vuelta AS v
+JOIN temp.piloto AS p ON p.pilotoId = v.pilotoId
+JOIN temp.granPremio AS gp ON gp.carreraId = v.carreraId
+JOIN temp.circuito AS c ON c.circuitoId = gp.circuitoId;
 
 \echo 'Cargando pilotos realizan pit stops en gps'
 INSERT INTO final.boxes(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,hora,tiempo)
@@ -357,10 +357,10 @@ INSERT INTO final.boxes(pilotoRef,anno,circuitoRef,nombreGP,numeroVuelta,hora,ti
     b.numeroVuelta::int,
     b.hora::TIME,
     b.milisegundos::int
-FROM temp.boxes b
-JOIN temp.piloto p ON p.pilotoId = b.pilotoId
-JOIN temp.granPremio gp ON gp.carreraId = b.carreraId
-JOIN temp.circuito c ON c.circuitoId = gp.circuitoId;;
+FROM temp.boxes AS b
+JOIN temp.piloto AS p ON p.pilotoId = b.pilotoId
+JOIN temp.granPremio AS gp ON gp.carreraId = b.carreraId
+JOIN temp.circuito AS c ON c.circuitoId = gp.circuitoId;;
 
 
 COMMIT;

@@ -8,6 +8,6 @@ Proyecto para la asignatura Bases de Datos
 
 ## PL2
 - Parte 1 - Consultas [/consultas](src/queries/)
-- Parte 2 - Triggers
+- Parte 2 - Triggers []
 - Parte 3 - Creación de usuarios
 - Parte 4 - Programa externo
