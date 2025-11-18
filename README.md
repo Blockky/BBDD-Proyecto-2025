@@ -7,7 +7,7 @@ Proyecto para la asignatura Bases de Datos
 - Parte 3 - Carga de datos [/plantilla.sql](src/plantilla.sql)
 
 ## PL2
-- Parte 1 - Consultas [/consultas](src/queries/)
-- Parte 2 - Triggers []
+- Parte 1 - Consultas [/queries/*.sql](src/queries/)
+- Parte 2 - Triggers [/triggers/*.sql](src/triggers/)
 - Parte 3 - Creación de usuarios
 - Parte 4 - Programa externo
