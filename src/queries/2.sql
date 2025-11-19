@@ -5,8 +5,8 @@ puntos conseguidos en las mismas */
 \echo 'Grandes premios corridos y total de puntos de Ayrton Senna\n'
 
 SELECT
-    COUNT(*) AS gps_corridos,
+    COUNT(c.pilotoRef) AS gps_corridos,
     SUM(c.puntos) AS puntos
-FROM final.corre c
-JOIN final.piloto p ON p.pilotoRef = c.pilotoRef
+FROM final.corre AS c
+JOIN final.piloto AS p ON p.pilotoRef = c.pilotoRef
 WHERE p.nombre = 'Ayrton' and p.apellido = 'Senna';

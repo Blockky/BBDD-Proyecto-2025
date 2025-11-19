@@ -362,5 +362,4 @@ JOIN temp.piloto AS p ON p.pilotoId = b.pilotoId
 JOIN temp.granPremio AS gp ON gp.carreraId = b.carreraId
 JOIN temp.circuito AS c ON c.circuitoId = gp.circuitoId;;
 
-
 COMMIT;
