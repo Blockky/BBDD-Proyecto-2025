@@ -8,7 +8,7 @@ carreras al que menos */
 SELECT
     c.nombre AS nombre_circuito,
     COUNT(gp.circuitoRef) AS numero_de_gps
-FROM final.circuito c
-JOIN final.granPremio gp ON c.circuitoRef = gp.circuitoRef
+FROM final.circuito AS c
+JOIN final.granPremio AS gp ON c.circuitoRef = gp.circuitoRef
 GROUP BY c.circuitoRef
 ORDER BY numero_de_gps DESC;
