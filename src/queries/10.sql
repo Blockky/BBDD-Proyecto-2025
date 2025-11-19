@@ -10,4 +10,4 @@ FROM (
     GROUP BY p.nombre,p.apellido
 )
 WHERE "Num grandes premios" >= 100
-ORDER BY "Num grandes premios" DESC;
+ORDER BY "Num grandes premios" DESC; 
