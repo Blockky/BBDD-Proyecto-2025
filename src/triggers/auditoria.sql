@@ -59,6 +59,3 @@ CREATE TRIGGER tg_auditoria_vuelta after INSERT or UPDATE or DELETE
 CREATE TRIGGER tg_auditoria_boxes after INSERT or UPDATE or DELETE
     ON boxes FOR EACH ROW
     EXECUTE PROCEDURE fn_auditoria();
-
-    
-COMMIT;
