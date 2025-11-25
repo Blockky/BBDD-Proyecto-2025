@@ -1,16 +1,14 @@
-/*Piloto con la vuelta más rápida en toda la historia*/
+/* 8. Piloto con la vuelta más rápida en toda la historia*/
+\pset pager off
 
-SELECT p.nombre AS "Nombre",p.apellido AS "Apellido",v.nombregp AS "Gran Premio", v.anno AS "ANNO",v.numerovuelta AS "Num Vuelta", v.tiempo AS "TIEMPO"
-FROM(
-    SELECT pilotoref,nombregp,anno,numerovuelta,tiempo 
+\echo 'Piloto con la vuelta más rápida en toda la historia\n'
+
+SELECT 
+    (p.nombre ||' '|| p.apellido) AS "Nombre",
+    v.tiempo AS "Tiempo"
+FROM final.vuelta AS v 
+JOIN final.piloto AS p ON v.pilotoref = p.pilotoref
+WHERE v.tiempo = (
+    SELECT min(tiempo)
     FROM final.vuelta
-    WHERE tiempo =(
-        SELECT MIN(tiempo)
-        FROM final.vuelta
-    )
-)v
-JOIN(
-    SELECT pilotoref,nombre,apellido
-    FROM final.piloto
-)p
-ON v.pilotoref = p.pilotoref
+);

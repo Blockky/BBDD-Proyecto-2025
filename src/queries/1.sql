@@ -6,9 +6,9 @@ carreras al que menos */
 \echo 'Numero de grandes premios albergados por circuito\n'
 
 SELECT
-    c.nombre AS nombre_circuito,
-    COUNT(gp.circuitoRef) AS numero_de_gps
+    c.nombre AS "Nombre del circuito",
+    COUNT(gp.circuitoRef) AS "Num de GPs"
 FROM final.circuito AS c
 JOIN final.granPremio AS gp ON c.circuitoRef = gp.circuitoRef
 GROUP BY c.circuitoRef
-ORDER BY numero_de_gps DESC;
+ORDER BY "Num de GPs" DESC;

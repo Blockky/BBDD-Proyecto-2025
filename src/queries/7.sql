@@ -1,15 +1,11 @@
-/*Número de Grandes Premios por país*/
+/* 7. Número de Grandes Premios por país*/
+\pset pager off
 
-SELECT cir.pais as "Pais", COUNT(*) AS "Num Grandes Premios"
-FROM (
-    SELECT anno,circuitoref,nombregp
-    FROM final.granpremio
-)gp 
-JOIN(
-    SELECT circuitoref,pais
-    FROM final.circuito
-)cir
+\echo 'Número de Grandes Premios por país\n'
 
-ON gp.circuitoref = cir.circuitoref
-GROUP BY "Pais"
-ORDER BY "Num Grandes Premios" DESC;
+SELECT
+    c.pais as "Pais", 
+    COUNT(c.circuitoref) AS "Num GPs"
+FROM final.granpremio AS gp 
+JOIN final.circuito AS c ON gp.circuitoref = c.circuitoref
+GROUP BY "Pais";
