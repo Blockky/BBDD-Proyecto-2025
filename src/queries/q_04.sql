@@ -9,5 +9,5 @@ SELECT
     COUNT(c.escuderiaRef) AS "GPs corridos"
 FROM final.escuderia AS e
 JOIN final.corre AS c ON e.escuderiaRef = c.escuderiaRef
-WHERE e.nacionalidad = 'Spanish' or e.nacionalidad = 'Italian'
+WHERE e.nacionalidad = 'Spanish' OR e.nacionalidad = 'Italian'
 GROUP BY "Escuderia";

@@ -10,5 +10,5 @@ SELECT
     COUNT(c.pilotoRef) AS "Participaciones"
 FROM final.piloto AS p 
 JOIN final.corre AS c ON c.pilotoRef = p.pilotoRef
-WHERE p.fechaNacimiento::char > '1999-12-31'
+WHERE p.fechaNacimiento::CHAR > '1999-12-31'
 GROUP BY "Nombre y apellidos"; 
