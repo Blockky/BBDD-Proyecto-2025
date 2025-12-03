@@ -13,5 +13,7 @@ CREATE VIEW vista_temporada AS
     JOIN final.piloto AS p ON p.pilotoref = c.pilotoref
     GROUP BY "Temporada", "Piloto";
 
-SELECT * FROM vista_temporada
-ORDER BY "Temporada" ASC;
+SELECT * 
+FROM vista_temporada
+WHERE "Temporada" = 2010
+ORDER BY "Total de puntos" DESC;
