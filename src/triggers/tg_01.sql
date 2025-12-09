@@ -12,13 +12,13 @@ CREATE TABLE IF NOT EXISTS auditoria(
 CREATE OR REPLACE FUNCTION fn_auditoria() RETURNS TRIGGER AS $fn_auditoria$
     BEGIN
         IF TG_OP='INSERT' THEN
-            INSERT INTO auditoria(tablaModificada, tipoEvento, usuario, fechaHora)
+            INSERT INTO final.auditoria(tablaModificada, tipoEvento, usuario, fechaHora)
                 VALUES(TG_TABLE_NAME, 'alta', CURRENT_USER, current_timestamp);
         ELSIF TG_OP='UPDATE' THEN
-            INSERT INTO auditoria(tablaModificada, tipoEvento, usuario, fechaHora)
+            INSERT INTO final.auditoria(tablaModificada, tipoEvento, usuario, fechaHora)
                 VALUES(TG_TABLE_NAME, 'modificación', CURRENT_USER, current_timestamp);
         ELSIF TG_OP='DELETE' THEN
-            INSERT INTO auditoria(tablaModificada, tipoEvento, usuario, fechaHora)
+            INSERT INTO final.auditoria(tablaModificada, tipoEvento, usuario, fechaHora)
                 VALUES(TG_TABLE_NAME, 'borrado', CURRENT_USER, current_timestamp);
         END IF;
         RETURN NULL;
