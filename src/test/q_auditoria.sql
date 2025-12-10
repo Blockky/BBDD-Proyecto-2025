@@ -1,2 +1,1 @@
-SELECT *
-FROM final.auditoria;
+SELECT * FROM final.auditoria;

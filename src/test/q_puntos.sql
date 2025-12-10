@@ -1,2 +1,1 @@
-SELECT *
-FROM final.total_puntos_piloto;
+SELECT * FROM final.total_puntos_piloto;
