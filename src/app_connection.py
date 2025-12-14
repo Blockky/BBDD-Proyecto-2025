@@ -6,8 +6,6 @@ class userException(Exception):pass
 class passwordException(Exception):pass
 class querySelectionException(Exception):pass
 
-print("Hola")
-
 def ask_user(msg):
     """
         ask for a valid username
