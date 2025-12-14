@@ -26,8 +26,8 @@ def ask_conn_parameters():
     """
     host = 'localhost'                                                          # 
     port = ask_port('TCP port number: ')                                        # pide un puerto TCP
-    user = 'administrador'                                                           # TODO
-    password = 'admin'                                                         # TODO
+    user = 'administrador'                                                      # TODO
+    password = 'admin'                                                          # TODO
     database = 'formula1'                                                       # TODO
     return (host, port, user, password, database)
 
