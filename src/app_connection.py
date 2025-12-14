@@ -1,18 +1,54 @@
 import sys
 import psycopg2
 
+class portException(Exception): pass
+class userException(Exception):pass
+class passwordException(Exception):pass
+class querySelectionException(Exception):pass
+
+print("Hola")
+
+def ask_user(msg):
+    """
+        ask for a valid username
+        ask_user :: String -> IO String | Exception
+    """
+    try:
+        user = input (msg).strip()
+        if user == "":
+            raise ValueError
+    except ValueError:
+        raise userException
+    else:
+        return user
+
+def ask_password(msg):
+    """
+        ask for a valid password for the provided user
+        ask_user :: String -> IO String | Exception
+    """
+    try:
+        password = input (msg).strip()
+        if password == "":
+            raise ValueError
+    except ValueError:
+        raise passwordException
+    else:
+        return password
+
 def pedir_credenciales():
     port = 5432
     database = 'formula1'
     host = 'localhost'
 
-    user = input('Nombre de usuario: ')
-    password = input(f'Contraseña de {user}: ')
+    user = ask_user('Nombre de usuario: ')
+    password = ask_password('Contraseña: ')
 
     return (host, port, user, password, database)
     
 def main():
     try:
+        
         (host, port, user, password, database) = pedir_credenciales()
         parametros_conexion = f'host={host} port={port} user={user} password={password} dbname={database}' 
 
@@ -47,6 +83,10 @@ def main():
 
     except KeyboardInterrupt:
         print("Program interrupted by user.")
+    except userException:
+        print("The user is not valid!")
+    except passwordException:
+        print("The password is incorrect!")
     finally:
         print("Program finished")
 
@@ -73,17 +113,17 @@ def realizar_consulta():
         case '4':
             return "SELECT e.nombre, COUNT(c.escuderiaRef) FROM final.escuderia AS e JOIN final.corre AS c ON e.escuderiaRef = c.escuderiaRef WHERE e.nacionalidad = 'Spanish' OR e.nacionalidad = 'Italian' GROUP BY e.nombre;"
         case '5':
-            return ""
+            return """SELECT * FROM (SELECT c.anno AS "Temporada", (p.nombre || ' ' || p.apellido) AS "Piloto", SUM(c.puntos) AS "Total de puntos" FROM final.corre AS c JOIN final.piloto AS p ON p.pilotoref = c.pilotoref GROUP BY "Temporada", "Piloto") AS vista_temporada WHERE "Temporada" = 2010 ORDER BY "Total de puntos" DESC;"""
         case '6':
-            return ''
+            return """SELECT (p.nombre || ' ' || p.apellido) AS "Nombre" FROM final.piloto AS p JOIN final.corre AS c ON p.pilotoRef = c.pilotoRef WHERE c.posicion = 1 GROUP BY "Nombre";"""
         case '7':
-            return ''
+            return """SELECT c.pais AS "Pais", COUNT(c.circuitoref) AS "Num GPs" FROM final.granpremio AS gp JOIN final.circuito AS c ON gp.circuitoref = c.circuitoref GROUP BY "Pais";"""
         case '8':
-            return ''
+            return """SELECT (p.nombre ||' '|| p.apellido) AS "Nombre", v.tiempo AS "Tiempo" FROM final.vuelta AS v JOIN final.piloto AS p ON v.pilotoref = p.pilotoref WHERE v.tiempo = (SELECT min(tiempo) FROM final.vuelta);"""
         case '9':
-            return ''
+            return """SELECT (p.nombre ||' '|| p.apellido) AS "Nombre", COUNT(*) AS "Num paradas en boxes" FROM final.piloto AS p JOIN final.boxes AS b ON p.pilotoref = b.pilotoref JOIN final.circuito AS c ON b.circuitoref = c.circuitoref WHERE b.anno = 2023 AND c.pais = 'Monaco' GROUP BY "Nombre" ORDER BY "Num paradas en boxes" DESC;"""
         case '10':
-            return ''
+            return """SELECT (p.nombre || ' ' || p.apellido) AS "Nombre", COUNT(p.pilotoRef) AS "GPs participadas" FROM final.corre AS c JOIN final.piloto AS p ON c.pilotoRef = p.pilotoRef GROUP BY "Nombre" HAVING COUNT(c.pilotoRef) > 100 ORDER BY COUNT(c.pilotoRef);"""
         case _:
             print('Consulta no válida!')
             return False
