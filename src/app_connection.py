@@ -1,62 +1,91 @@
 import sys
-import psycopg2 # pyright: ignore[reportMissingModuleSource]
+import psycopg2
 
-class portException(Exception): pass
+def pedir_credenciales():
+    port = 5432
+    database = 'formula1'
+    host = 'localhost'
 
-def ask_port(msg):
-    """
-        ask for a valid TCP port
-        ask_port :: String -> IO Integer | Exception
-    """
-    try:                                                                        # try
-        answer  = input(msg)                                                    # pide el puerto
-        port    = int(answer)                                                   # convierte a entero
-        if (port < 1024) or (port > 65535):                                     # si el puerto no es valido
-            raise ValueError                                                    # lanza una excepción
-    except ValueError:                                                          # if ValueError
-        raise portException                                                     # raise portException
-    finally:                                                                    # finally
-        return port                                                             # return port
+    user = input('Nombre de usuario: ')
+    password = input(f'Contraseña de {user}: ')
 
-def ask_conn_parameters():
-    """
-        ask_conn_parameters:: () -> IO String
-        pide los parámetros de conexión
-        TODO: cada estudiante debe introducir los valores para su base de datos
-    """
-    host = 'localhost'                                                          # 
-    port = ask_port('TCP port number: ')                                        # pide un puerto TCP
-    user = 'administrador'                                                      # TODO
-    password = 'admin'                                                          # TODO
-    database = 'formula1'                                                       # TODO
     return (host, port, user, password, database)
-
+    
 def main():
-    """
-        main :: () -> IO None
-    """
     try:
-        (host, port, user, password, database) = ask_conn_parameters()          #
-        connstring = f'host={host} port={port} user={user} password={password} dbname={database}' 
-        conn    = psycopg2.connect(connstring)                                  #
-                                                                               
-        cur     = conn.cursor()                                                 # instacia un cursor
-        query   = 'SELECT * FROM final.piloto'                               # prepara una consulta
-        cur.execute(query)                                                      # ejecuta la consulta
-        for record in cur.fetchall():                                           # fetchall devuelve todas las filas de la consulta
-            print(record)                                                       # imprime las filas
-        cur.close                                                               # cierra el cursor
-        conn.close                                                              # cierra la conexion
-    except portException:
-        print("The port is not valid!")
+        (host, port, user, password, database) = pedir_credenciales()
+        parametros_conexion = f'host={host} port={port} user={user} password={password} dbname={database}' 
+
+        conexion_f1 = psycopg2.connect(parametros_conexion)
+        cursor_f1 = conexion_f1.cursor()
+
+        print(f'Iniciado sesión como {user} en la base de datos {database}')
+
+        no_salir = True
+        while(no_salir):
+            print(  '\nMenú del programa:',
+                    '\n\t1. Realizar una consulta.',
+                    '\n\t2. Insertar datos en una tabla.',
+                    '\n\t3. Salir del programa.')
+            opcion = input('Elija una opción (1, 2, 3): ')
+            match opcion:
+                case '1':
+                    query = realizar_consulta()
+                    if(query):
+                        cursor_f1.execute(query)
+                        for record in cursor_f1.fetchall():
+                            print(record)
+                case '2':
+                    print('casi')
+                case '3':
+                    no_salir = False
+                case _:
+                    print('Opción no válida! (1, 2, 3)')
+
+        cursor_f1.close
+        conexion_f1.close
+
     except KeyboardInterrupt:
         print("Program interrupted by user.")
     finally:
         print("Program finished")
 
-if __name__ == "__main__":                                                      # Es el modula principal?
-    if '--test' in sys.argv:                                                    # chequea el argumento cmdline buscando el modo test
-        import doctest                                                          # importa la libreria doctest
-        doctest.testmod()                                                       # corre los tests
-    else:                                                                       # else
-        main()                                                                  # ejecuta el programa principal
+def realizar_consulta():
+    print(  '\nElija la consulta a realizar',
+            '\n\t1. Numero de GPs albergados por circuito.',
+            '\n\t2. GPs corridos y total de puntos de Ayrton Senna.',
+            '\n\t3. Pilotos nacidos despues del 31-12-1999 y carreras en las que participaron.',
+            '\n\t4. Escuderias españolas e italinas y número de GPs en los que han corrido.',
+            '\n\t5. Puntos obtenidos por cada piloto en cada temporada.',
+            '\n\t6. Pilotos que han ganado al menos un GP.',
+            '\n\t7. Número de Grandes Premios por país.',
+            '\n\t8. Piloto con la vuelta más rápida en toda la historia.',
+            '\n\t9. Número de boxes por piloto del GP de Mónaco de 2023.',
+            '\n\t10. Pilotos con mas 100 GPs participadas.')
+    opcion = input('Consulta a realizar: ')
+    match opcion:
+        case '1':
+            return "SELECT c.nombre, COUNT(gp.circuitoRef) FROM final.circuito AS c JOIN final.granPremio AS gp ON c.circuitoRef = gp.circuitoRef GROUP BY c.circuitoRef ORDER BY COUNT(gp.circuitoRef) DESC;"
+        case '2':
+            return "SELECT COUNT(c.pilotoRef), SUM(c.puntos) FROM final.corre AS c JOIN final.piloto AS p ON p.pilotoRef = c.pilotoRef WHERE p.nombre = 'Ayrton' and p.apellido = 'Senna';"
+        case '3':
+            return "SELECT (p.nombre ||' '|| p.apellido), COUNT(c.pilotoRef) FROM final.piloto AS p JOIN final.corre AS c ON c.pilotoRef = p.pilotoRef WHERE p.fechaNacimiento::CHAR > '1999-12-31' GROUP BY (p.nombre ||' '|| p.apellido);"
+        case '4':
+            return "SELECT e.nombre, COUNT(c.escuderiaRef) FROM final.escuderia AS e JOIN final.corre AS c ON e.escuderiaRef = c.escuderiaRef WHERE e.nacionalidad = 'Spanish' OR e.nacionalidad = 'Italian' GROUP BY e.nombre;"
+        case '5':
+            return ""
+        case '6':
+            return ''
+        case '7':
+            return ''
+        case '8':
+            return ''
+        case '9':
+            return ''
+        case '10':
+            return ''
+        case _:
+            print('Consulta no válida!')
+            return False
+
+main()
