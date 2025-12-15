@@ -1,4 +1,3 @@
--- Comprobación del trigger de calcular total de puntos de un piloto
 INSERT INTO final.corre VALUES(
     'ferrari',              -- EscuderíaRef
     'alonso',               -- PilotoRef
@@ -9,3 +8,5 @@ INSERT INTO final.corre VALUES(
     'casi gana',            -- Estado
     6                       -- Puntos
 );
+
+SELECT * FROM final.total_puntos_piloto;

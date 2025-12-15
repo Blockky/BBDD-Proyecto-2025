@@ -33,7 +33,7 @@ def main():
             print(  
                 '\nMenú del programa:',
                 '\n\t1. Realizar una consulta.',
-                '\n\t2. Insertar datos en una tabla.',
+                '\n\t2. Añadir un nuevo registro de un Gran Premio.',
                 '\n\t3. Salir del programa.'
             )
             opcion = input('Elija una opción (1, 2, 3): ')
@@ -45,7 +45,7 @@ def main():
                         for record in cursor_f1.fetchall():
                             print(record)
                 case '2':
-                    insercion = insetar_tupla()
+                    insercion = insetar_gp()
                     if insercion:
                         cursor_f1.execute(insercion)
                 case '3':
@@ -100,65 +100,17 @@ def realizar_consulta():
             print('Consulta no válida!')
             return False
 
-def insetar_tupla():
-    print(
-        '\nElija la tabla en la que desee insertar datos:',
-        '\n\t1. Piloto',
-        '\n\t2. Escuderia',
-        '\n\t3. Circuito',
-        '\n\t4. Temporada'
-    )
-    opcion = input('Tabla a modificar: ')
+def insetar_gp():
+    nombregp = input("Nombre del Gran Premio: ")
+    fecha = input("Fecha en la que toma lugar (AAAA-MM-DD): ")
+    anno = fecha[:4]
+    hora = input("Hora en la que toma lugar (HH:MM:SS): ")
+    circuitoref = input("Referencia del circuito donde toma lugar (se debe tener registrada en la base de datos) Ejemplos:{red_bull_ring, silverstone, monza}: ")
+    ronda = input("Número de la ronda: ")
+    url = input("URL de la página web del Gran Premio: ")
 
-    match opcion:
-        case '1':
-            pilotoRef = input("PilotoRef: ")
-            nombre = input("Nombre: ")
-            apellido = input("Apellido: ")
-            nacionalidad = input("Nacionalidad: ")
-            fecha = input("Fecha de nacimiento (YYYY-MM-DD): ")
-            numero = input("Número: ")
-            codigo = input("Código (AAA): ")
-            url = input("URL: ")
-
-            return f"""
-            INSERT INTO final.piloto
-            VALUES ('{pilotoRef}',{numero},'{codigo}','{nombre}','{apellido}','{fecha}','{nacionalidad}','{url}');"""
-
-        case '2':
-            escuderiaRef = input("EscuderiaRef: ")
-            nombre = input("Nombre: ")
-            nacionalidad = input("Nacionalidad: ")
-            url = input("URL: ")
-
-            return f"""
-            INSERT INTO final.escuderia
-            VALUES ('{escuderiaRef}','{nombre}','{nacionalidad}','{url}');"""
-
-        case '3':
-            circuitoRef = input("CircuitoRef: ")
-            nombre = input("Nombre: ")
-            ciudad = input("Ciudad: ")
-            pais = input("País: ")
-            url = input("URL: ")
-            longitud = input("Longitud: ")
-            latitud = input("Latitud: ")
-            altura = input("Altura: ")
-
-            return f"""
-            INSERT INTO final.circuito
-            VALUES ('{circuitoRef}','{nombre}','{ciudad}','{pais}','{url}',{latitud},{longitud},{altura});"""
-
-        case '4':
-            anno = input("Año: ")
-            url = input("URL: ")
-
-            return f"""
-            INSERT INTO final.temporada
-            VALUES ({anno},'{url}');"""
-
-        case _:
-            print("Opción no válida")
-            return False
+    return f"""
+        INSERT INTO final.granpremio
+        VALUES ('{nombregp}',{anno},'{circuitoref}',{ronda},'{fecha}','{hora}','{url}');"""
 
 main()
